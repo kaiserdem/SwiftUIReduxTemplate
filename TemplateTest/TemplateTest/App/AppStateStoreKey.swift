@@ -9,7 +9,6 @@ import Foundation
 import ReduxCore
 import SwiftUI
 
-// Конкретний Environment Key для вашого AppState
 struct AppStateStoreKey: EnvironmentKey {
     static var defaultValue: ObservableStore<AppState>? = nil
 }

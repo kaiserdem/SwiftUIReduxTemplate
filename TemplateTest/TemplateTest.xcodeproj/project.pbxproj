@@ -14,19 +14,6 @@
 		0553E56F2E59BFCB005B305B /* TemplateTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TemplateTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		0553E5962E59C0D5005B305B /* Exceptions for "SwiftUIRedux" folder in "TemplateTest" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Templates/ActionsTemplate.swift,
-				Templates/AppTemplate.swift,
-				Templates/MiddlewareTemplate.swift,
-				Templates/StateTemplate.swift,
-			);
-			target = 0553E56E2E59BFCB005B305B /* TemplateTest */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0553E5712E59BFCB005B305B /* TemplateTest */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -35,9 +22,6 @@
 		};
 		0553E58D2E59C018005B305B /* SwiftUIRedux */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				0553E5962E59C0D5005B305B /* Exceptions for "SwiftUIRedux" folder in "TemplateTest" target */,
-			);
 			path = SwiftUIRedux;
 			sourceTree = "<group>";
 		};

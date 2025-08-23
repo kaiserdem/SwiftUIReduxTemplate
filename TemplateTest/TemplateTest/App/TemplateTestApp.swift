@@ -13,7 +13,7 @@ struct TemplateTestApp: App {
     private let store = ObservableStore<AppState>(
         store: Store<AppState>(
             state: AppState.initial,
-            reducer: reduce,
+            reducer: AppState.reduce,
             middlewares: [
                 DebugLogMiddleware<AppState>().middleware(),
                                APIMiddleware().middleware()

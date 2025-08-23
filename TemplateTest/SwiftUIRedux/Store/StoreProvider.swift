@@ -9,10 +9,6 @@ import SwiftUI
 import ReduxCore
 import Foundation
 
-/// ObservableStore for SwiftUI integration
-/// Replaces the StoreLocator pattern with Environment-based injection
-/// ObservableStore для інтеграції з SwiftUI
-/// Замінює паттерн StoreLocator на інжекцію через Environment
 @Observable
 public final class ObservableStore<State> {
     public private(set) var state: State
@@ -34,13 +30,11 @@ public final class ObservableStore<State> {
     }
     
     /// Dispatch command without parameters
-    /// Відправка команди без параметрів
     public func dispatch(command: Command) {
         command.perform()
     }
     
     /// Dispatch command with parameters
-    /// Відправка команди з параметрами
     public func dispatch<T>(command: CommandWith<T>, with value: T) {
         command.perform(with: value)
     }
@@ -50,24 +44,16 @@ public final class ObservableStore<State> {
     }
 }
 
-// MARK: - Environment for global state access
-// MARK: - Environment для глобального доступу до стану
-
-/// Environment key for the app store
-/// Ключ Environment для app store
 public struct AppStoreKey<State>: EnvironmentKey {
     public static var defaultValue: ObservableStore<State>? { nil }
 }
 
 public extension EnvironmentValues {
-    /// Generic store access through Environment
-    /// Загальний доступ до store через Environment
+
     func appStore<State>() -> ObservableStore<State>? {
         return self[AppStoreKey<State>.self]
     }
     
-    /// Set store in Environment
-    /// Встановити store в Environment
     mutating func setAppStore<State>(_ store: ObservableStore<State>) {
         self[AppStoreKey<State>.self] = store
     }

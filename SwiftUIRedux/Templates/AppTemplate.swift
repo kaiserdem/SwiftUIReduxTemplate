@@ -9,7 +9,9 @@ import SwiftUI
 import ReduxCore
 
 /// Main SwiftUI App with Redux architecture
+/// Використовує нову архітектуру з протоколом StateReducer
 /// Головний SwiftUI App з Redux архітектурою
+/// Використовує нову архітектуру з протоколом StateReducer
 @main
 struct YourApp: App {
     
@@ -18,11 +20,11 @@ struct YourApp: App {
     private let store = ObservableStore<AppState>(
         store: Store<AppState>(
             state: AppState.initial,
-            reducer: reduce,
+            reducer: AppState.reduce, // ✅ Використовуємо нову архітектуру
             middlewares: [
                 // Core middlewares (always include these)
                 // Основні middleware (завжди включайте ці)
-                DebugLogMiddleware().middleware(),
+                DebugLogMiddleware<AppState>().middleware(),
                 
                 // TODO: Add your custom middlewares here
                 // TODO: Додайте ваші кастомні middleware тут
@@ -91,13 +93,29 @@ struct ContentView: View {
                         .foregroundColor(.red)
                 }
                 
-                // Example button
-                // Приклад кнопки
-                Button("Load Data") {
-                    store.dispatch(action: Actions.MainScreen.ButtonTapped(buttonType: "load_data"))
+                // Example buttons using new Actions
+                // Приклад кнопок використовуючи нові Actions
+                Button("Start Loading") {
+                    store.dispatch(action: Actions.StartLoading())
                 }
                 .padding()
                 .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+                
+                Button("Add Item") {
+                    store.dispatch(action: Actions.AddSingleItem(item: "New Item"))
+                }
+                .padding()
+                .background(Color.green)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+                
+                Button("Clear Items") {
+                    store.dispatch(action: Actions.ClearItems())
+                }
+                .padding()
+                .background(Color.red)
                 .foregroundColor(.white)
                 .cornerRadius(8)
                 

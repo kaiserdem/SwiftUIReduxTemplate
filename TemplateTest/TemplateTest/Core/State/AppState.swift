@@ -8,68 +8,55 @@
 import Foundation
 import ReduxCore
 
-struct AppState {
+protocol StateReducer {
+    associatedtype State
+    
+    static func stateReduce(into state: inout State, action: any Action)
+}
+
+extension StateReducer where Self == State {
+    static func reduce(_ state: State, with action: any Action) -> State {
+        var newState = state
+        
+        stateReduce(into: &newState, action: action)
+        
+        return newState
+    }
+}
+
+struct AppState: StateReducer {
+    typealias State = AppState
+    
     let application: ApplicationState
-    let isLoading: Bool
-    let items: [String]
+    var isLoading: Bool
+    var items: [String]
     let errorMessage: String?
     
-    static let initial = AppState(
+    static let initial = State(
         application: ApplicationState.initial,
         isLoading: false,
         items: [],
         errorMessage: nil
     )
-}
-
-
-func reduce(_ state: AppState, with action: Action) -> AppState {
-    var newState = state
     
-    // Application lifecycle (обов'язково!)
-    newState = AppState(
-        application: reduce(state.application, with: action),
-        isLoading: state.isLoading,
-        items: state.items,
-        errorMessage: state.errorMessage
-    )
-    
-    // Обробка наших дій
+    static func stateReduce(into state: inout AppState, action: any Action) {
         switch action {
         case is Actions.StartLoading:
-            return AppState(
-                application: newState.application,
-                isLoading: true,
-                items: state.items,
-                errorMessage: nil
-            )
+            state.isLoading = true
             
         case let action as Actions.LoadingFinished:
-                return AppState(
-                    application: newState.application,
-                    isLoading: false,
-                    items: state.items + action.items,
-                    errorMessage: nil
-                )
+            state.isLoading = false
+            state.items = state.items + action.items
             
         case let action as Actions.AddSingleItem:
-                return AppState(
-                    application: newState.application,
-                    isLoading: state.isLoading,
-                    items: state.items + [action.item],
-                    errorMessage: nil
-                )
-                
-            case is Actions.ClearItems:
-                return AppState(
-                    application: newState.application,
-                    isLoading: state.isLoading,
-                    items: [],       
-                    errorMessage: nil
-                )
+            state.items = state.items + [action.item]
+            
+        case is Actions.ClearItems:
+            state.items = []
             
         default:
-            return newState
+            break
         }
-    
+    }
 }
+

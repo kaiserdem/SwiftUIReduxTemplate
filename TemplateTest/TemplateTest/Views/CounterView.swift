@@ -23,7 +23,6 @@ struct CounterView: View {
                    }
                    Text("Items count: \(store.state.items.count)")
                    
-                   // Кнопки
                    VStack {
                        Button("Add Item") {
                            let newItem = "Item \(store.state.items.count + 1)"
@@ -42,7 +41,6 @@ struct CounterView: View {
                        .modifier(CounterButtonStyle())
                    }
                    
-                   // Список елементів
                    ScrollView {
                        ForEach(store.state.items, id: \.self) { item in
                            Text(item)

@@ -9,7 +9,9 @@ import Foundation
 import ReduxCore
 
 /// Example middleware for handling API calls
+/// Використовує нову архітектуру з протоколом StateReducer
 /// Приклад middleware для обробки API викликів
+/// Використовує нову архітектуру з протоколом StateReducer
 struct APIMiddleware {
     
     /// Create middleware instance
@@ -20,10 +22,8 @@ struct APIMiddleware {
             // TODO: Handle your custom actions
             // TODO: Обробіть ваші кастомні дії
             switch action {
-            case is Actions.MainScreen.ButtonTapped:
-                // Example: When button tapped, start loading
-                // Приклад: Коли кнопку натиснуто, почати завантаження
-                dispatch(Actions.API.StartLoading())
+            case is Actions.StartLoading:
+                print("🔄 Starting API call...")
                 
                 // Simulate API call
                 // Симуляція API виклику
@@ -32,18 +32,18 @@ struct APIMiddleware {
                     // Симуляція успіху
                     let mockData = ["Item 1", "Item 2", "Item 3"]
                     DispatchQueue.main.async {
-                        dispatch(Actions.API.LoadSuccess(data: mockData))
+                        dispatch(Actions.LoadingFinished(items: mockData))
                     }
                 }
                 
-            case is Actions.API.StartLoading:
-                print("🔄 Starting API call...")
+            case let action as Actions.LoadingFinished:
+                print("✅ API call successful: \(action.items)")
                 
-            case let action as Actions.API.LoadSuccess:
-                print("✅ API call successful: \(action.data)")
+            case let action as Actions.AddSingleItem:
+                print("➕ Adding item: \(action.item)")
                 
-            case let action as Actions.API.LoadFailure:
-                print("❌ API call failed: \(action.error)")
+            case is Actions.ClearItems:
+                print("🗑️ Clearing all items")
                 
             default:
                 // Do nothing for other actions
@@ -64,12 +64,14 @@ struct UserActionMiddleware {
             // Log user interactions
             // Логування взаємодій користувача
             switch action {
-            case let action as Actions.MainScreen.ButtonTapped:
-                print("👆 User tapped button: \(action.buttonType)")
+            case is Actions.StartLoading:
+                print("👆 User started loading data")
                 
-                // TODO: Send analytics event
-                // TODO: Відправити аналітичну подію
-                // Analytics.track("button_tapped", properties: ["type": action.buttonType])
+            case let action as Actions.AddSingleItem:
+                print("👆 User added item: \(action.item)")
+                
+            case is Actions.ClearItems:
+                print("👆 User cleared all items")
                 
             default:
                 break
@@ -88,11 +90,11 @@ struct UserActionMiddleware {
  private let store = ObservableStore<AppState>(
      store: Store<AppState>(
          state: AppState.initial,
-         reducer: reduce,
+         reducer: AppState.reduce,  // ✅ Нова архітектура
          middlewares: [
-             DebugLogMiddleware().middleware(),  // From ReduxCore
-             APIMiddleware().middleware(),       // Your custom middleware
-             UserActionMiddleware().middleware() // Your custom middleware
+             DebugLogMiddleware<AppState>().middleware(),  // From ReduxCore
+             APIMiddleware().middleware(),                 // Your custom middleware
+             UserActionMiddleware().middleware()           // Your custom middleware
          ]
      )
  )

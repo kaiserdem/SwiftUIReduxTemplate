@@ -9,9 +9,9 @@ import Foundation
 import ReduxCore
 
 /// Namespace for all application actions
-/// Organized by feature/middleware for better structure
+/// Простий та зрозумілий підхід без зайвої складності
 /// Namespace для всіх дій додатку
-/// Організовано за функціоналом/middleware для кращої структури
+/// Простий та зрозумілий підхід без зайвої складності
 enum Actions {
     
     // MARK: - Application Lifecycle Actions (DO NOT MODIFY)
@@ -36,50 +36,34 @@ enum Actions {
         /// App will enter foreground
         /// Додаток переходить на передній план
         struct WillEnterForeground: Action {}
-        
-        /// App finished launching
-        /// Додаток завершив запуск
-        struct DidFinishLaunch: Action {}
     }
     
     // MARK: - TODO: Add your custom actions here
     // MARK: - TODO: Додайте ваші кастомні дії тут
     
-    /// Example: UI Actions for main screen
-    /// Приклад: UI дії для головного екрану
-    enum MainScreen {
-        
-        /// Example: User tapped a button
-        /// Приклад: Користувач натиснув кнопку
-        struct ButtonTapped: Action {
-            let buttonType: String
-        }
-        
-        // TODO: Add more UI actions
-        // TODO: Додайте більше UI дій
+    /// Example: Simple actions for main functionality
+    /// Приклад: Прості дії для основного функціоналу
+    
+    /// Start loading data
+    /// Почати завантаження даних
+    struct StartLoading: Action {}
+    
+    /// Data loaded successfully
+    /// Дані завантажені успішно
+    struct LoadingFinished: Action { 
+        let items: [String] // Replace with your data type
     }
     
-    /// Example: Actions for API calls
-    /// Приклад: Дії для API викликів
-    enum API {
-        
-        /// Start loading data
-        /// Почати завантаження даних
-        struct StartLoading: Action {}
-        
-        /// Data loaded successfully
-        /// Дані завантажені успішно
-        struct LoadSuccess: Action {
-            let data: [String] // Replace with your data type
-        }
-        
-        /// Loading failed
-        /// Завантаження не вдалося
-        struct LoadFailure: Action {
-            let error: Error
-        }
-        
-        // TODO: Add more API actions
-        // TODO: Додайте більше API дій
+    /// Add single item
+    /// Додати один елемент
+    struct AddSingleItem: Action { 
+        let item: String // Replace with your data type
     }
+    
+    /// Clear all items
+    /// Очистити всі елементи
+    struct ClearItems: Action {}
+    
+    // TODO: Add more actions as needed
+    // TODO: Додайте більше дій за потреби
 }

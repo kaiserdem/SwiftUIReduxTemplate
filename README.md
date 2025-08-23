@@ -1,6 +1,6 @@
 # SwiftUI Redux Template
 
-Готова Redux архітектура для SwiftUI проектів з українськими коментарями.
+Готова Redux архітектура для SwiftUI проектів з українськими коментарями та новою модульною архітектурою.
 
 ## 📁 Структура
 
@@ -12,20 +12,53 @@
 │ └── CommandWith.swift # ✅ ГОТОВИЙ: Command pattern
 ├── Lifecycle/
 │ └── ApplicationState.swift # ✅ ГОТОВИЙ: Життєвий цикл додатку
-├── Debugging/
-│ └── DebugLogMiddleware.swift # ✅ ГОТОВИЙ: Debug middleware
-└── Templates/ # 📝 ШАБЛОНИ ДЛЯ КОПІЮВАННЯ:
-├── ActionsTemplate.swift # → скопіюйте як Actions.swift
-├── StateTemplate.swift # → скопіюйте як AppState.swift
-├── MiddlewareTemplate.swift # → скопіюйте як YourMiddleware.swift
-└── AppTemplate.swift # → використайте для оновлення App.swift
+└── Debugging/
+    └── DebugLogMiddleware.swift # ✅ ГОТОВИЙ: Debug middleware
 
+TemplateTest/ # 🚀 ГОТОВИЙ ПРИКЛАД ВИКОРИСТАННЯ
+├── Core/
+│ ├── Actions/
+│ │ └── Actions.swift # Приклад Actions з новою архітектурою
+│ ├── State/
+│ │ └── AppState.swift # Приклад AppState з протоколом StateReducer
+│ └── Middleware/
+│     └── APIMiddleware.swift # Приклад middleware
+└── Views/
+    └── CounterView.swift # Приклад View з Redux
 ```
 
 ### 🔍 Пояснення структури:
 
 **✅ Готові компоненти** - використовуйте як є, імпортуйте в свій код  
-**📝 Templates** - це стартові шаблони для ВАШОЇ бізнес-логіки
+**🚀 TemplateTest** - готовий робочий приклад нової архітектури
+
+## 🆕 Нова архітектура
+
+### Протокол StateReducer
+```swift
+protocol StateReducer {
+    associatedtype State
+    
+    // Новий підхід: змінюємо стан напряму
+    static func stateReduce(into state: inout State, action: any Action)
+}
+
+// Автоматична композиція reducer'ів
+extension StateReducer where Self == State {
+    static func reduce(_ state: State, with action: any Action) -> State {
+        var newState = state
+        stateReduce(into: &newState, action: action)
+        return newState
+    }
+}
+```
+
+### Переваги нової архітектури:
+- ✅ **Менше дублювання** - не потрібно створювати нові об'єкти в кожному case
+- ✅ **Простота** - `stateReduce(into:)` змінює стан напряму
+- ✅ **Ефективність** - менше алокацій пам'яті
+- ✅ **Автоматична композиція** - reducer'и автоматично об'єднуються
+- ✅ **TCA стиль** - функціональна композиція з простим синтаксисом
 
 ## 🚀 Як використовувати в новому проекті
 
@@ -46,133 +79,74 @@
 
 💡 **Результат**: У Project Navigator з'явиться синя папка `SwiftUIRedux/`
 
-#### Альтернатива: Перетягування
-⚠️ **Увага**: При перетягуванні папки з Finder в Xcode **обов'язково** оберіть **"Create folder references"** в діалозі, інакше папка буде сіра замість синьої!
-
-### ⚠️ ВАЖЛИВО: НЕ додавайте Templates до target!
-
-**Якщо у вас є папка `Templates/`** - **НЕ ДОДАВАЙТЕ** її до target проекту! Це призведе до помилок компіляції.
-
-**Правильно:**
-- ✅ Додати тільки папки: `Store/`, `Commands/`, `Lifecycle/`, `Debugging/`
-- ❌ НЕ додавати: `Templates/` (якщо вона є)
-
-**Якщо випадково додали Templates:**
-1. Виберіть папку `Templates/` в Project Navigator
-2. Правий клік → Delete → Remove references
-
 ### Крок 3: Створення вашої бізнес-логіки
-Тепер створіть файли для ВАШОГО проекту, використовуючи шаблони:
+Тепер створіть файли для ВАШОГО проекту, використовуючи готовий приклад:
 
-1. **Створіть `Actions.swift`** - скопіюйте код з `Templates/ActionsTemplate.swift`
-2. **Створіть `AppState.swift`** - скопіюйте код з `Templates/StateTemplate.swift`  
-3. **Створіть ваші Middleware** - скопіюйте код з `Templates/MiddlewareTemplate.swift`
-4. **Оновіть `App.swift`** - використайте код з `Templates/AppTemplate.swift`
+1. **Створіть `Actions.swift`** - скопіюйте код з `TemplateTest/Core/Actions/Actions.swift`
+2. **Створіть `AppState.swift`** - скопіюйте код з `TemplateTest/Core/State/AppState.swift`  
+3. **Створіть ваші Middleware** - скопіюйте код з `TemplateTest/Core/Middleware/APIMiddleware.swift`
+4. **Оновіть `App.swift`** - використайте код з `TemplateTest/App/TemplateTestApp.swift`
 
-💡 **Чому копіювати?** Templates - це стартова точка для ВАШОЇ специфічної логіки. Готові компоненти з папок `Store/`, `Commands/`, `Lifecycle/`, `Debugging/` використовуйте як є!
+💡 **Чому копіювати з TemplateTest?** Це готовий робочий приклад нової архітектури!
 
+## 💻 Приклад використання нової архітектури
 
-### Крок 4: Обов'язкові файли для роботи
-
-#### 4.1 Створіть Environment Key
-**Новий файл: `AppStateStoreKey.swift`**
-```swift
-import SwiftUI
-
-// Environment Key для вашого конкретного AppState
-struct AppStateStoreKey: EnvironmentKey {
-    static var defaultValue: ObservableStore<AppState>? = nil
-}
-
-extension EnvironmentValues {
-    var appStateStore: ObservableStore<AppState>? {
-        get { self[AppStateStoreKey.self] }
-        set { self[AppStateStoreKey.self] = newValue }
-    }
-}
-```
-
-#### 4.2 Створіть Actions
-**Новий файл: `Actions.swift`**
+### Actions.swift
 ```swift
 import Foundation
 import ReduxCore
 
 enum Actions {
-    // Приклад дій
+    // Прості Actions без зайвої складності
     struct StartLoading: Action {}
     struct LoadingFinished: Action { let items: [String] }
-    struct ShowError: Action { let message: String }
+    struct AddSingleItem: Action { let item: String }
+    struct ClearItems: Action {}
 }
 ```
 
-#### 4.3 Оновіть App.swift
-**Замініть приклад на робочий код:**
+### AppState.swift
 ```swift
-import SwiftUI
+import Foundation
 import ReduxCore
 
-@main
-struct YourApp: App {
-    private let store = ObservableStore<AppState>(
-        store: Store<AppState>(
-            state: AppState.initial,
-            reducer: reduce,
-            middlewares: [
-                DebugLogMiddleware<AppState>().middleware()
-            ]
-        )
+struct AppState: StateReducer {
+    typealias State = AppState
+    
+    let application: ApplicationState
+    var isLoading: Bool
+    var items: [String]
+    let errorMessage: String?
+    
+    static let initial = State(
+        application: ApplicationState.initial,
+        isLoading: false,
+        items: [],
+        errorMessage: nil
     )
     
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environment(\.appStateStore, store)  // ✅ ВИПРАВЛЕНО
-        }
-        .onChange(of: scenePhase) { _, newPhase in
-            switch newPhase {
-            case .active:
-                store.dispatch(action: ApplicationLifecycleActions.DidBecomeActive())
-            case .inactive:
-                store.dispatch(action: ApplicationLifecycleActions.WillResignActive())
-            case .background:
-                store.dispatch(action: ApplicationLifecycleActions.DidEnterBackground())
-            @unknown default:
-                break
-            }
-        }
-    }
-    
-    @Environment(\.scenePhase) private var scenePhase
-}
-```
-
-#### 4.4 Оновіть ContentView.swift
-```swift
-struct ContentView: View {
-    @Environment(\.appStateStore) private var store: ObservableStore<AppState>?  // ✅ ВИПРАВЛЕНО
-    
-    var body: some View {
-        VStack {
-            if let store = store {
-                Text("App is: \(store.state.application == .active ? "Active" : "Inactive")")
-                Text("Items count: \(store.state.items.count)")
-                
-                Button("Start Loading") {
-                    store.dispatch(action: Actions.StartLoading())  // ✅ РОБОЧИЙ ПРИКЛАД
-                }
-                
-                if store.state.isLoading {
-                    ProgressView("Loading...")
-                }
-            }
+    // Нова архітектура: змінюємо стан напряму
+    static func stateReduce(into state: inout AppState, action: any Action) {
+        switch action {
+        case is Actions.StartLoading:
+            state.isLoading = true
+            
+        case let action as Actions.LoadingFinished:
+            state.isLoading = false
+            state.items = state.items + action.items
+            
+        case let action as Actions.AddSingleItem:
+            state.items = state.items + [action.item]
+            
+        case is Actions.ClearItems:
+            state.items = []
+            
+        default:
+            break
         }
     }
 }
 ```
-
-## 💡 Приклад використання (оновлений API)
-
 
 ### App.swift
 ```swift
@@ -184,7 +158,7 @@ struct YourApp: App {
     private let store = ObservableStore<AppState>(
         store: Store<AppState>(
             state: AppState.initial,
-            reducer: reduce,
+            reducer: AppState.reduce, // ✅ Нова архітектура
             middlewares: [
                 DebugLogMiddleware<AppState>().middleware()
             ]
@@ -194,7 +168,7 @@ struct YourApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.appStateStore, store)  // ✅ ПРАЦЮЄ
+                .environment(\.appStore, store)
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
@@ -217,16 +191,24 @@ struct YourApp: App {
 ### ContentView.swift
 ```swift
 struct ContentView: View {
-    @Environment(\.appStateStore) private var store: ObservableStore<AppState>?  // ✅ ПРАЦЮЄ
+    @Environment(\.appStore) private var store: ObservableStore<AppState>?
     
     var body: some View {
         VStack(spacing: 20) {
             if let store = store {
-                Text("App is: \(store.state.application == .active ? "Active" : "Inactive")")
+                Text("App State: \(store.state.application == .active ? "Active" : "Inactive")")
                 Text("Items count: \(store.state.items.count)")
                 
                 Button("Start Loading") {
-                    store.dispatch(action: Actions.StartLoading())  // ✅ ІСНУЄ
+                    store.dispatch(action: Actions.StartLoading())
+                }
+                
+                Button("Add Item") {
+                    store.dispatch(action: Actions.AddSingleItem(item: "New Item"))
+                }
+                
+                Button("Clear Items") {
+                    store.dispatch(action: Actions.ClearItems())
                 }
                 
                 if store.state.isLoading {
@@ -243,26 +225,15 @@ struct ContentView: View {
 }
 ```
 
-### Actions.swift (обов'язковий файл)
-```swift
-import Foundation
-import ReduxCore
+## ✨ Переваги нової архітектури
 
-enum Actions {
-    struct StartLoading: Action {}
-    struct LoadingFinished: Action { let items: [String] }
-    struct ClearItems: Action {}
-}
-```
-
-## ✨ Переваги
-
-- **SwiftUI нативність**: `@Observable` та `Environment`
-- **Життєвий цикл**: Автоматична обробка `ScenePhase`
-- **Type Safety**: Повна підтримка типів Swift
-- **Українські коментарі**: Зрозуміло для українських розробників
-- **Debug Support**: Вбудований debug middleware
-- **Generic Architecture**: Працює з будь-яким типом стану
+- **🚀 Простота**: `stateReduce(into:)` без дублювання коду
+- **⚡ Ефективність**: менше алокацій пам'яті
+- **🔄 Автоматична композиція**: reducer'и автоматично об'єднуються
+- **🎯 TCA стиль**: функціональна композиція з простим синтаксисом
+- **🔒 Типобезпека**: повна підтримка типів Swift
+- **🇺🇦 Українські коментарі**: зрозуміло для українських розробників
+- **🐛 Debug Support**: вбудований debug middleware
 
 ## 📦 Вимоги
 
@@ -273,6 +244,24 @@ enum Actions {
 ## 🎯 Швидкий старт
 
 1. ✅ **Готові компоненти**: Додайте папку `SwiftUIRedux/` → імпортуйте та використовуйте
-2. 📝 **Ваша логіка**: Створіть файли з шаблонів `Templates/` → налаштуйте під ваш проект  
+2. 🚀 **Ваша логіка**: Скопіюйте код з `TemplateTest/` → налаштуйте під ваш проект  
 3. 🔗 **Залежності**: Додайте `ReduxCore` через SPM
-4. 🚀 **Насолоджуйтесь Redux!**
+4. 🚀 **Насолоджуйтесь новою Redux архітектурою!**
+
+## 🔄 Міграція зі старої архітектури
+
+### Що змінилося:
+- ❌ **Стара**: `func reduce(_ state: AppState, with action: Action) -> AppState`
+- ✅ **Нова**: `static func stateReduce(into state: inout AppState, action: any Action)`
+
+### Як мігрувати:
+1. **Додайте протокол** `StateReducer` до вашого `AppState`
+2. **Замініть** `reduce` на `stateReduce(into:)`
+3. **Використовуйте** `AppState.reduce` в Store
+4. **Видаліть** дублювання коду в reducer'ах
+
+## 📚 Додаткові ресурси
+
+- **TemplateTest/** - готовий робочий приклад
+- **SwiftUIRedux/** - готова абстракція
+- **ReduxCore** - базова бібліотека
