@@ -71,7 +71,108 @@
 
 💡 **Чому копіювати?** Templates - це стартова точка для ВАШОЇ специфічної логіки. Готові компоненти з папок `Store/`, `Commands/`, `Lifecycle/`, `Debugging/` використовуйте як є!
 
+
+### Крок 4: Обов'язкові файли для роботи
+
+#### 4.1 Створіть Environment Key
+**Новий файл: `AppStateStoreKey.swift`**
+```swift
+import SwiftUI
+
+// Environment Key для вашого конкретного AppState
+struct AppStateStoreKey: EnvironmentKey {
+    static var defaultValue: ObservableStore<AppState>? = nil
+}
+
+extension EnvironmentValues {
+    var appStateStore: ObservableStore<AppState>? {
+        get { self[AppStateStoreKey.self] }
+        set { self[AppStateStoreKey.self] = newValue }
+    }
+}
+```
+
+#### 4.2 Створіть Actions
+**Новий файл: `Actions.swift`**
+```swift
+import Foundation
+import ReduxCore
+
+enum Actions {
+    // Приклад дій
+    struct StartLoading: Action {}
+    struct LoadingFinished: Action { let items: [String] }
+    struct ShowError: Action { let message: String }
+}
+```
+
+#### 4.3 Оновіть App.swift
+**Замініть приклад на робочий код:**
+```swift
+import SwiftUI
+import ReduxCore
+
+@main
+struct YourApp: App {
+    private let store = ObservableStore<AppState>(
+        store: Store<AppState>(
+            state: AppState.initial,
+            reducer: reduce,
+            middlewares: [
+                DebugLogMiddleware<AppState>().middleware()
+            ]
+        )
+    )
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environment(\.appStateStore, store)  // ✅ ВИПРАВЛЕНО
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .active:
+                store.dispatch(action: ApplicationLifecycleActions.DidBecomeActive())
+            case .inactive:
+                store.dispatch(action: ApplicationLifecycleActions.WillResignActive())
+            case .background:
+                store.dispatch(action: ApplicationLifecycleActions.DidEnterBackground())
+            @unknown default:
+                break
+            }
+        }
+    }
+    
+    @Environment(\.scenePhase) private var scenePhase
+}
+```
+
+#### 4.4 Оновіть ContentView.swift
+```swift
+struct ContentView: View {
+    @Environment(\.appStateStore) private var store: ObservableStore<AppState>?  // ✅ ВИПРАВЛЕНО
+    
+    var body: some View {
+        VStack {
+            if let store = store {
+                Text("App is: \(store.state.application == .active ? "Active" : "Inactive")")
+                Text("Items count: \(store.state.items.count)")
+                
+                Button("Start Loading") {
+                    store.dispatch(action: Actions.StartLoading())  // ✅ РОБОЧИЙ ПРИКЛАД
+                }
+                
+                if store.state.isLoading {
+                    ProgressView("Loading...")
+                }
+            }
+        }
+    }
+}
+```
+
 ## 💡 Приклад використання (оновлений API)
+
 
 ### App.swift
 ```swift
@@ -93,7 +194,7 @@ struct YourApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.setAppStore, store)
+                .environment(\.appStateStore, store)  // ✅ ПРАЦЮЄ
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
@@ -116,56 +217,41 @@ struct YourApp: App {
 ### ContentView.swift
 ```swift
 struct ContentView: View {
-    @Environment(\.appStore) private var store: ObservableStore<AppState>?
+    @Environment(\.appStateStore) private var store: ObservableStore<AppState>?  // ✅ ПРАЦЮЄ
     
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             if let store = store {
                 Text("App is: \(store.state.application == .active ? "Active" : "Inactive")")
                 Text("Items count: \(store.state.items.count)")
                 
-                Button("Test Action") {
-                    store.dispatch(action: YourAction())
+                Button("Start Loading") {
+                    store.dispatch(action: Actions.StartLoading())  // ✅ ІСНУЄ
+                }
+                
+                if store.state.isLoading {
+                    ProgressView("Loading...")
+                }
+                
+                ForEach(store.state.items, id: \.self) { item in
+                    Text(item)
                 }
             }
         }
+        .padding()
     }
 }
 ```
 
-### AppState.swift (приклад)
+### Actions.swift (обов'язковий файл)
 ```swift
 import Foundation
 import ReduxCore
 
-struct AppState {
-    let application: ApplicationState
-    let isLoading: Bool
-    let items: [String]
-    let errorMessage: String?
-    
-    static let initial = AppState(
-        application: ApplicationState.initial,
-        isLoading: false,
-        items: [],
-        errorMessage: nil
-    )
-}
-
-func reduce(_ state: AppState, with action: Action) -> AppState {
-    var newState = state
-    
-    // Application lifecycle (обов'язково!)
-    newState = AppState(
-        application: reduce(state.application, with: action),
-        isLoading: state.isLoading,
-        items: state.items,
-        errorMessage: state.errorMessage
-    )
-    
-    // Тут додайте обробку ваших дій...
-    
-    return newState
+enum Actions {
+    struct StartLoading: Action {}
+    struct LoadingFinished: Action { let items: [String] }
+    struct ClearItems: Action {}
 }
 ```
 
