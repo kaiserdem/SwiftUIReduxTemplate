@@ -5,20 +5,21 @@
 ## 📁 Структура
 
 ```
-SwiftUIRedux/
+    SwiftUIRedux/
 ├── Store/
-│   └── StoreProvider.swift      # ✅ ГОТОВИЙ: ObservableStore для SwiftUI
+│ └── StoreProvider.swift # ✅ ГОТОВИЙ: ObservableStore для SwiftUI
 ├── Commands/
-│   └── CommandWith.swift        # ✅ ГОТОВИЙ: Command pattern
+│ └── CommandWith.swift # ✅ ГОТОВИЙ: Command pattern
 ├── Lifecycle/
-│   └── ApplicationState.swift   # ✅ ГОТОВИЙ: Життєвий цикл додатку
+│ └── ApplicationState.swift # ✅ ГОТОВИЙ: Життєвий цикл додатку
 ├── Debugging/
-│   └── DebugLogMiddleware.swift # ✅ ГОТОВИЙ: Debug middleware
-└── Templates/                   # 📝 ШАБЛОНИ ДЛЯ КОПІЮВАННЯ:
-    ├── ActionsTemplate.swift    # → скопіюйте як Actions.swift
-    ├── StateTemplate.swift      # → скопіюйте як AppState.swift
-    ├── MiddlewareTemplate.swift # → скопіюйте як YourMiddleware.swift
-    └── AppTemplate.swift        # → використайте для оновлення App.swift
+│ └── DebugLogMiddleware.swift # ✅ ГОТОВИЙ: Debug middleware
+└── Templates/ # 📝 ШАБЛОНИ ДЛЯ КОПІЮВАННЯ:
+├── ActionsTemplate.swift # → скопіюйте як Actions.swift
+├── StateTemplate.swift # → скопіюйте як AppState.swift
+├── MiddlewareTemplate.swift # → скопіюйте як YourMiddleware.swift
+└── AppTemplate.swift # → використайте для оновлення App.swift
+
 ```
 
 ### 🔍 Пояснення структури:
@@ -48,6 +49,18 @@ SwiftUIRedux/
 #### Альтернатива: Перетягування
 ⚠️ **Увага**: При перетягуванні папки з Finder в Xcode **обов'язково** оберіть **"Create folder references"** в діалозі, інакше папка буде сіра замість синьої!
 
+### ⚠️ ВАЖЛИВО: НЕ додавайте Templates до target!
+
+**Якщо у вас є папка `Templates/`** - **НЕ ДОДАВАЙТЕ** її до target проекту! Це призведе до помилок компіляції.
+
+**Правильно:**
+- ✅ Додати тільки папки: `Store/`, `Commands/`, `Lifecycle/`, `Debugging/`
+- ❌ НЕ додавати: `Templates/` (якщо вона є)
+
+**Якщо випадково додали Templates:**
+1. Виберіть папку `Templates/` в Project Navigator
+2. Правий клік → Delete → Remove references
+
 ### Крок 3: Створення вашої бізнес-логіки
 Тепер створіть файли для ВАШОГО проекту, використовуючи шаблони:
 
@@ -57,6 +70,119 @@ SwiftUIRedux/
 4. **Оновіть `App.swift`** - використайте код з `Templates/AppTemplate.swift`
 
 💡 **Чому копіювати?** Templates - це стартова точка для ВАШОЇ специфічної логіки. Готові компоненти з папок `Store/`, `Commands/`, `Lifecycle/`, `Debugging/` використовуйте як є!
+
+## 💡 Приклад використання (оновлений API)
+
+### App.swift
+```swift
+import SwiftUI
+import ReduxCore
+
+@main
+struct YourApp: App {
+    private let store = ObservableStore<AppState>(
+        store: Store<AppState>(
+            state: AppState.initial,
+            reducer: reduce,
+            middlewares: [
+                DebugLogMiddleware<AppState>().middleware()
+            ]
+        )
+    )
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environment(\.setAppStore, store)
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .active:
+                store.dispatch(action: ApplicationLifecycleActions.DidBecomeActive())
+            case .inactive:
+                store.dispatch(action: ApplicationLifecycleActions.WillResignActive())
+            case .background:
+                store.dispatch(action: ApplicationLifecycleActions.DidEnterBackground())
+            @unknown default:
+                break
+            }
+        }
+    }
+    
+    @Environment(\.scenePhase) private var scenePhase
+}
+```
+
+### ContentView.swift
+```swift
+struct ContentView: View {
+    @Environment(\.appStore) private var store: ObservableStore<AppState>?
+    
+    var body: some View {
+        VStack {
+            if let store = store {
+                Text("App is: \(store.state.application == .active ? "Active" : "Inactive")")
+                Text("Items count: \(store.state.items.count)")
+                
+                Button("Test Action") {
+                    store.dispatch(action: YourAction())
+                }
+            }
+        }
+    }
+}
+```
+
+### AppState.swift (приклад)
+```swift
+import Foundation
+import ReduxCore
+
+struct AppState {
+    let application: ApplicationState
+    let isLoading: Bool
+    let items: [String]
+    let errorMessage: String?
+    
+    static let initial = AppState(
+        application: ApplicationState.initial,
+        isLoading: false,
+        items: [],
+        errorMessage: nil
+    )
+}
+
+func reduce(_ state: AppState, with action: Action) -> AppState {
+    var newState = state
+    
+    // Application lifecycle (обов'язково!)
+    newState = AppState(
+        application: reduce(state.application, with: action),
+        isLoading: state.isLoading,
+        items: state.items,
+        errorMessage: state.errorMessage
+    )
+    
+    // Тут додайте обробку ваших дій...
+    
+    return newState
+}
+```
+
+## ✨ Переваги
+
+- **SwiftUI нативність**: `@Observable` та `Environment`
+- **Життєвий цикл**: Автоматична обробка `ScenePhase`
+- **Type Safety**: Повна підтримка типів Swift
+- **Українські коментарі**: Зрозуміло для українських розробників
+- **Debug Support**: Вбудований debug middleware
+- **Generic Architecture**: Працює з будь-яким типом стану
+
+## 📦 Вимоги
+
+- iOS 17.0+
+- SwiftUI
+- ReduxCore 2.0+
 
 ## 🎯 Швидкий старт
 

@@ -7,44 +7,41 @@
 
 import SwiftUI
 import ReduxCore
-
-/// Type alias to avoid conflict with SwiftUI's @State
-/// Псевдонім типу для уникнення конфлікту з SwiftUI @State
-typealias AppState = State
+import Foundation
 
 /// ObservableStore for SwiftUI integration
 /// Replaces the StoreLocator pattern with Environment-based injection
 /// ObservableStore для інтеграції з SwiftUI
 /// Замінює паттерн StoreLocator на інжекцію через Environment
 @Observable
-final class ObservableStore<State> {
-    private(set) var state: State
+public final class ObservableStore<State> {
+    public private(set) var state: State
     private let store: Store<State>
     private var cancellation: Cancellation?
     
-    init(store: Store<State>) {
+    public init(store: Store<State>) {
         self.store = store
         self.state = store.state
         self.cancellation = store.observe { [weak self] state in
-            DispatchQueue.main.async {
+            Foundation.DispatchQueue.main.async {
                 self?.state = state
             }
         }
     }
     
-    func dispatch(action: any ReduxCore.Action) {
+    public func dispatch(action: any ReduxCore.Action) {
         store.dispatch(action: action)
     }
     
     /// Dispatch command without parameters
     /// Відправка команди без параметрів
-    func dispatch(command: Command) {
+    public func dispatch(command: Command) {
         command.perform()
     }
     
     /// Dispatch command with parameters
     /// Відправка команди з параметрами
-    func dispatch<T>(command: CommandWith<T>, with value: T) {
+    public func dispatch<T>(command: CommandWith<T>, with value: T) {
         command.perform(with: value)
     }
     
@@ -58,13 +55,20 @@ final class ObservableStore<State> {
 
 /// Environment key for the app store
 /// Ключ Environment для app store
-struct AppStoreKey: EnvironmentKey {
-    static var defaultValue: ObservableStore<AppState>? = nil
+public struct AppStoreKey<State>: EnvironmentKey {
+    public static var defaultValue: ObservableStore<State>? { nil }
 }
 
-extension EnvironmentValues {
-    var appStore: ObservableStore<AppState>? {
-        get { self[AppStoreKey.self] }
-        set { self[AppStoreKey.self] = newValue }
+public extension EnvironmentValues {
+    /// Generic store access through Environment
+    /// Загальний доступ до store через Environment
+    func appStore<State>() -> ObservableStore<State>? {
+        return self[AppStoreKey<State>.self]
+    }
+    
+    /// Set store in Environment
+    /// Встановити store в Environment
+    mutating func setAppStore<State>(_ store: ObservableStore<State>) {
+        self[AppStoreKey<State>.self] = store
     }
 }
