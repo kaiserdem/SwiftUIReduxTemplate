@@ -11,6 +11,6 @@ import ReduxCore
 enum Actions {
     struct StartLoading: Action {}
     struct LoadingFinished: Action { let items: [String] }
-    struct AddSingleItem: Action { let item: String }    
+    struct AddSingleItem: Action {}    
     struct ClearItems: Action {}    
 }

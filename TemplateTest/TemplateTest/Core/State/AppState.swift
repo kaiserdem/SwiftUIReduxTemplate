@@ -8,22 +8,6 @@
 import Foundation
 import ReduxCore
 
-protocol StateReducer {
-    associatedtype State
-    
-    static func stateReduce(into state: inout State, action: any Action)
-}
-
-extension StateReducer where Self == State {
-    static func reduce(_ state: State, with action: any Action) -> State {
-        var newState = state
-        
-        stateReduce(into: &newState, action: action)
-        
-        return newState
-    }
-}
-
 struct AppState: StateReducer {
     typealias State = AppState
     
@@ -48,8 +32,9 @@ struct AppState: StateReducer {
             state.isLoading = false
             state.items = state.items + action.items
             
-        case let action as Actions.AddSingleItem:
-            state.items = state.items + [action.item]
+        case _ as Actions.AddSingleItem:
+            let newItem = "Item \(state.items.count + 1)"
+            state.items = state.items + [newItem]
             
         case is Actions.ClearItems:
             state.items = []

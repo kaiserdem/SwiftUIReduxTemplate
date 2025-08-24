@@ -15,7 +15,6 @@ public struct DebugLogMiddleware<AppState> {
     public func middleware() -> Middleware<AppState> {
         { _, action, _, _ in
             // Log all actions except frequent ones to avoid spam
-            // Логуємо всі дії окрім частих, щоб уникнути спаму
             os_log("%@",
                    log: OSLog(subsystem: Bundle.main.bundleIdentifier ?? "", category: "Redux"),
                    type: .debug,

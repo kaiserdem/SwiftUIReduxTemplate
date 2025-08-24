@@ -7,7 +7,8 @@
 ```
     SwiftUIRedux/
 ├── Store/
-│ └── StoreProvider.swift # ✅ ГОТОВИЙ: ObservableStore для SwiftUI
+│ ├── StoreProvider.swift # ✅ ГОТОВИЙ: ObservableStore для SwiftUI
+│ └── StateReducer.swift # ✅ НОВИЙ: Протокол StateReducer
 ├── Commands/
 │ └── CommandWith.swift # ✅ ГОТОВИЙ: Command pattern
 ├── Lifecycle/
@@ -35,8 +36,10 @@ TemplateTest/ # 🚀 ГОТОВИЙ ПРИКЛАД ВИКОРИСТАННЯ
 ## 🆕 Нова архітектура
 
 ### Протокол StateReducer
+**Розташування:** `SwiftUIRedux/Store/StateReducer.swift`
+
 ```swift
-protocol StateReducer {
+public protocol StateReducer {
     associatedtype State
     
     // Новий підхід: змінюємо стан напряму
@@ -44,10 +47,13 @@ protocol StateReducer {
 }
 
 // Автоматична композиція reducer'ів
-extension StateReducer where Self == State {
+public extension StateReducer where Self == State {
     static func reduce(_ state: State, with action: any Action) -> State {
         var newState = state
+        
+        // Автоматично викликаємо stateReduce для композиції
         stateReduce(into: &newState, action: action)
+        
         return newState
     }
 }
@@ -89,7 +95,7 @@ extension StateReducer where Self == State {
 
 💡 **Чому копіювати з TemplateTest?** Це готовий робочий приклад нової архітектури!
 
-## 💻 Приклад використання нової архітектури
+## 💻 Приклад використання  архітектури
 
 ### Actions.swift
 ```swift
@@ -97,10 +103,9 @@ import Foundation
 import ReduxCore
 
 enum Actions {
-    // Прості Actions без зайвої складності
     struct StartLoading: Action {}
     struct LoadingFinished: Action { let items: [String] }
-    struct AddSingleItem: Action { let item: String }
+    struct AddItem: Action {} 
     struct ClearItems: Action {}
 }
 ```
@@ -125,7 +130,6 @@ struct AppState: StateReducer {
         errorMessage: nil
     )
     
-    // Нова архітектура: змінюємо стан напряму
     static func stateReduce(into state: inout AppState, action: any Action) {
         switch action {
         case is Actions.StartLoading:
@@ -135,8 +139,9 @@ struct AppState: StateReducer {
             state.isLoading = false
             state.items = state.items + action.items
             
-        case let action as Actions.AddSingleItem:
-            state.items = state.items + [action.item]
+        case is Actions.AddItem: 
+            let newItem = "Item \(state.items.count + 1)"
+            state.items = state.items + [newItem]
             
         case is Actions.ClearItems:
             state.items = []
@@ -158,7 +163,7 @@ struct YourApp: App {
     private let store = ObservableStore<AppState>(
         store: Store<AppState>(
             state: AppState.initial,
-            reducer: AppState.reduce, // ✅ Нова архітектура
+            reducer: AppState.reduce, 
             middlewares: [
                 DebugLogMiddleware<AppState>().middleware()
             ]
@@ -204,7 +209,7 @@ struct ContentView: View {
                 }
                 
                 Button("Add Item") {
-                    store.dispatch(action: Actions.AddSingleItem(item: "New Item"))
+                    store.dispatch(action: Actions.AddItem()) 
                 }
                 
                 Button("Clear Items") {
@@ -232,7 +237,6 @@ struct ContentView: View {
 - **🔄 Автоматична композиція**: reducer'и автоматично об'єднуються
 - **🎯 TCA стиль**: функціональна композиція з простим синтаксисом
 - **🔒 Типобезпека**: повна підтримка типів Swift
-- **🇺🇦 Українські коментарі**: зрозуміло для українських розробників
 - **🐛 Debug Support**: вбудований debug middleware
 
 ## 📦 Вимоги
@@ -247,21 +251,3 @@ struct ContentView: View {
 2. 🚀 **Ваша логіка**: Скопіюйте код з `TemplateTest/` → налаштуйте під ваш проект  
 3. 🔗 **Залежності**: Додайте `ReduxCore` через SPM
 4. 🚀 **Насолоджуйтесь новою Redux архітектурою!**
-
-## 🔄 Міграція зі старої архітектури
-
-### Що змінилося:
-- ❌ **Стара**: `func reduce(_ state: AppState, with action: Action) -> AppState`
-- ✅ **Нова**: `static func stateReduce(into state: inout AppState, action: any Action)`
-
-### Як мігрувати:
-1. **Додайте протокол** `StateReducer` до вашого `AppState`
-2. **Замініть** `reduce` на `stateReduce(into:)`
-3. **Використовуйте** `AppState.reduce` в Store
-4. **Видаліть** дублювання коду в reducer'ах
-
-## 📚 Додаткові ресурси
-
-- **TemplateTest/** - готовий робочий приклад
-- **SwiftUIRedux/** - готова абстракція
-- **ReduxCore** - базова бібліотека

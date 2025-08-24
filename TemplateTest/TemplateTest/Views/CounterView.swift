@@ -25,8 +25,7 @@ struct CounterView: View {
                    
                    VStack {
                        Button("Add Item") {
-                           let newItem = "Item \(store.state.items.count + 1)"
-                           store.dispatch(action: Actions.AddSingleItem(item: newItem))
+                           store.dispatch(action: Actions.AddSingleItem())
                        }
                        .modifier(CounterButtonStyle())
                        
