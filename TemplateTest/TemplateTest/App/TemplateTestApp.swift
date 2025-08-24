@@ -10,13 +10,13 @@ import ReduxCore
 
 @main
 struct TemplateTestApp: App {
-    private let store = ObservableStore<AppState>(
-        store: Store<AppState>(
-            state: AppState.initial,
-            reducer: AppState.reduce,
+    private let store = ObservableStore<CounterState>(
+        store: Store<CounterState>(
+            state: CounterState.initial,
+            reducer: CounterState.reduce,
             middlewares: [
-                DebugLogMiddleware<AppState>().middleware(),
-                               APIMiddleware().middleware()
+                DebugLogMiddleware<CounterState>().middleware(),
+                               APICounterMiddleware().middleware()
             ]
         )
     )
@@ -24,7 +24,7 @@ struct TemplateTestApp: App {
     var body: some Scene {
         WindowGroup {
             CounterView()
-            .environment(\.appStateStore, store)
+            .environment(\.counterStateStore, store)
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {

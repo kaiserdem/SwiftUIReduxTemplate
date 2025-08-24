@@ -9,7 +9,7 @@ import SwiftUI
 import ReduxCore
 
 struct CounterView: View {
-    @Environment(\.appStateStore) private var store: ObservableStore<AppState>?
+    @Environment(\.counterStateStore) private var store: ObservableStore<CounterState>?
     
     var body: some View {
            VStack(spacing: 20) {
@@ -25,17 +25,17 @@ struct CounterView: View {
                    
                    VStack {
                        Button("Add Item") {
-                           store.dispatch(action: Actions.AddSingleItem())
+                           store.dispatch(action: CounterActions.AddSingleItem())
                        }
                        .modifier(CounterButtonStyle())
                        
                        Button("Load More") {
-                           store.dispatch(action: Actions.StartLoading())
+                           store.dispatch(action: CounterActions.StartLoading())
                        }
                        .modifier(CounterButtonStyle())
                        
                        Button("Clear All") {
-                           store.dispatch(action: Actions.ClearItems())
+                           store.dispatch(action: CounterActions.ClearItems())
                        }
                        .modifier(CounterButtonStyle())
                    }

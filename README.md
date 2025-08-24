@@ -17,18 +17,20 @@
     └── DebugLogMiddleware.swift 
 
 TemplateTest/ # 🚀 ГОТОВИЙ ПРИКЛАД ВИКОРИСТАННЯ
-├── Features/ # ✅ Функціональність додатку
-│ ├── Actions/
-│ │ └── Actions.swift # Приклад Actions з новою архітектурою
-│ ├── State/
-│ │ └── AppState.swift # Приклад AppState з протоколом StateReducer
-│ └── Middleware/
-│     └── APIMiddleware.swift # Приклад middleware
+├── Features/ 
+│ └── Counter/ 
+│     ├── Actions/
+│     │ └── CounterActions.swift 
+│     ├── State/
+│     │ └── CounterState.swift 
+│     ├── Middleware/
+│     │ └── APIMiddleware.swift
+│     └── Views/
+│         └── CounterView.swift 
 ├── App/
-│ ├── TemplateTestApp.swift # Головний App файл
-│ └── AppStateStoreKey.swift # Environment Key для AppState
-└── Views/
-    └── CounterView.swift # Приклад View з Redux
+│ ├── TemplateTestApp.swift 
+│ └── CounterStateStoreKey.swift
+└── Assets.xcassets/ 
 ```
 
 ### 🔍 Пояснення структури:
@@ -104,7 +106,7 @@ public extension StateReducer where Self == State {
 import Foundation
 import ReduxCore
 
-enum Actions {
+enum CounterActions {
     struct StartLoading: Action {}
     struct LoadingFinished: Action { let items: [String] }
     struct AddSingleItem: Action {}    
@@ -117,8 +119,8 @@ enum Actions {
 import Foundation
 import ReduxCore
 
-struct AppState: StateReducer {
-    typealias State = AppState
+struct CounterState: StateReducer {
+    typealias State = CounterState
     
     let application: ApplicationState
     var isLoading: Bool
@@ -132,20 +134,20 @@ struct AppState: StateReducer {
         errorMessage: nil
     )
     
-    static func stateReduce(into state: inout AppState, action: any Action) {
+    static func stateReduce(into state: inout CounterState, action: any Action) {
         switch action {
-        case is Actions.StartLoading:
+        case is CounterActions.StartLoading:
             state.isLoading = true
             
-        case let action as Actions.LoadingFinished:
+        case let action as CounterActions.LoadingFinished:
             state.isLoading = false
             state.items = state.items + action.items
             
-        case _ as Actions.AddSingleItem:
+        case _ as CounterActions.AddSingleItem:
             let newItem = "Item \(state.items.count + 1)"
             state.items = state.items + [newItem]
             
-        case is Actions.ClearItems:
+        case is CounterActions.ClearItems:
             state.items = []
             
         default:
@@ -161,14 +163,14 @@ import Foundation
 import ReduxCore
 import SwiftUI
 
-struct AppStateStoreKey: EnvironmentKey {
-    static var defaultValue: ObservableStore<AppState>? = nil
+struct CounterStateStoreKey: EnvironmentKey {
+    static var defaultValue: ObservableStore<CounterState>? = nil
 }
 
 extension EnvironmentValues {
-    var appStateStore: ObservableStore<AppState>? {
-        get { self[AppStateStoreKey.self] }
-        set { self[AppStateStoreKey.self] = newValue }
+    var counterStateStore: ObservableStore<CounterState>? {
+        get { self[CounterStateStoreKey.self] }
+        set { self[CounterStateStoreKey.self] = newValue }
     }
 }
 ```
@@ -179,21 +181,22 @@ import SwiftUI
 import ReduxCore
 
 @main
-struct YourApp: App {
-    private let store = ObservableStore<AppState>(
-        store: Store<AppState>(
-            state: AppState.initial,
-            reducer: AppState.reduce, 
+struct TemplateTestApp: App {
+    private let store = ObservableStore<CounterState>(
+        store: Store<CounterState>(
+            state: CounterState.initial,
+            reducer: CounterState.reduce,
             middlewares: [
-                DebugLogMiddleware<AppState>().middleware()
+                DebugLogMiddleware<CounterState>().middleware(),
+                               APICounterMiddleware().middleware()
             ]
         )
     )
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.appStateStore, store)
+            CounterView()
+            .environment(\.counterStateStore, store)
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
@@ -215,37 +218,57 @@ struct YourApp: App {
 
 ### ContentView.swift
 ```swift
-struct ContentView: View {
-    @Environment(\.appStateStore) private var store: ObservableStore<AppState>?
+struct CounterView: View {
+    @Environment(\.counterStateStore) private var store: ObservableStore<CounterState>?
     
     var body: some View {
-        VStack(spacing: 20) {
-            if let store = store {
-                Text("App State: \(store.state.application == .active ? "Active" : "Inactive")")
-                Text("Items count: \(store.state.items.count)")
-                
-                Button("Start Loading") {
-                    store.dispatch(action: Actions.StartLoading())
-                }
-                
-                Button("Add Item") {
-                    store.dispatch(action: Actions.AddSingleItem()) 
-                }
-                
-                Button("Clear Items") {
-                    store.dispatch(action: Actions.ClearItems())
-                }
-                
-                if store.state.isLoading {
-                    ProgressView("Loading...")
-                }
-                
-                ForEach(store.state.items, id: \.self) { item in
-                    Text(item)
-                }
-            }
-        }
-        .padding()
+           VStack(spacing: 20) {
+               if let store = store {
+                   
+                   if store.state.isLoading {
+                       ProgressView()
+                   } else {
+                       Text("App is: \(store.state.application == .active ? "Active" : "Inactive")")
+                       
+                   }
+                   Text("Items count: \(store.state.items.count)")
+                   
+                   VStack {
+                       Button("Add Item") {
+                           store.dispatch(action: CounterActions.AddSingleItem())
+                       }
+                       .modifier(CounterButtonStyle())
+                       
+                       Button("Load More") {
+                           store.dispatch(action: CounterActions.StartLoading())
+                       }
+                       .modifier(CounterButtonStyle())
+                       
+                       Button("Clear All") {
+                           store.dispatch(action: CounterActions.ClearItems())
+                       }
+                       .modifier(CounterButtonStyle())
+                   }
+                   
+                   ScrollView {
+                       ForEach(store.state.items, id: \.self) { item in
+                           Text(item)
+                               .padding(.horizontal)
+                       }
+                   }
+               }
+           }
+           .padding()
+       }
+}
+
+struct CounterButtonStyle: ViewModifier { // Просто приклад зручного використання ViewModifier для мненьшення коду в прикладі
+    func body(content: Content) -> some View {
+        content
+            .frame(maxWidth: .infinity)
+            .padding()
+            .border(.gray)
+        
     }
 }
 ```

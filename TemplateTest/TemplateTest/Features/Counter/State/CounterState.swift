@@ -1,5 +1,5 @@
 //
-//  AppState.swift
+//  CounterState.swift
 //  TemplateTest
 //
 //  Created by Yaroslav Golinskiy on 23/08/2025.
@@ -8,8 +8,8 @@
 import Foundation
 import ReduxCore
 
-struct AppState: StateReducer {
-    typealias State = AppState
+struct CounterState: StateReducer {
+    typealias State = CounterState
     
     let application: ApplicationState
     var isLoading: Bool
@@ -23,20 +23,20 @@ struct AppState: StateReducer {
         errorMessage: nil
     )
     
-    static func stateReduce(into state: inout AppState, action: any Action) {
+    static func stateReduce(into state: inout CounterState, action: any Action) {
         switch action {
-        case is Actions.StartLoading:
+        case is CounterActions.StartLoading:
             state.isLoading = true
             
-        case let action as Actions.LoadingFinished:
+        case let action as CounterActions.LoadingFinished:
             state.isLoading = false
             state.items = state.items + action.items
             
-        case _ as Actions.AddSingleItem:
+        case _ as CounterActions.AddSingleItem:
             let newItem = "Item \(state.items.count + 1)"
             state.items = state.items + [newItem]
             
-        case is Actions.ClearItems:
+        case is CounterActions.ClearItems:
             state.items = []
             
         default:

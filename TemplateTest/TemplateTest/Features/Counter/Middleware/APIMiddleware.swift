@@ -9,18 +9,18 @@
 import Foundation
 import ReduxCore
 
-struct APIMiddleware {
-    func middleware() -> Middleware<AppState> {
+struct APICounterMiddleware {
+    func middleware() -> Middleware<CounterState> {
         { dispatch, action, oldState, newState in
             switch action {
-            case is Actions.StartLoading:
+            case is CounterActions.StartLoading:
                 Task {
                     try? await Task.sleep(nanoseconds: 2_000_000_000) 
                     
                     let number = oldState.items.count + 1
                     let items = ["Item \(number)"]
                     await MainActor.run {
-                        dispatch(Actions.LoadingFinished(items: items))
+                        dispatch(CounterActions.LoadingFinished(items: items))
                     }
                 }
             default:
