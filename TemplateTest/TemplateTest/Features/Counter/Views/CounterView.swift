@@ -9,19 +9,19 @@ import SwiftUI
 import ReduxCore
 
 struct CounterView: View {
-    @Environment(\.counterStateStore) private var store: ObservableStore<CounterState>?
+    @Environment(\.tabStateStore) private var store: ObservableStore<TabState>?
     
     var body: some View {
            VStack(spacing: 20) {
                if let store = store {
                    
-                   if store.state.isLoading {
+                   if store.state.counterState.isLoading {
                        ProgressView()
                    } else {
                        Text("App is: \(store.state.application == .active ? "Active" : "Inactive")")
                        
                    }
-                   Text("Items count: \(store.state.items.count)")
+                   Text("Items count: \(store.state.counterState.items.count)")
                    
                    VStack {
                        Button("Add Item") {
@@ -41,7 +41,7 @@ struct CounterView: View {
                    }
                    
                    ScrollView {
-                       ForEach(store.state.items, id: \.self) { item in
+                       ForEach(store.state.counterState.items, id: \.self) { item in
                            Text(item)
                                .padding(.horizontal)
                        }

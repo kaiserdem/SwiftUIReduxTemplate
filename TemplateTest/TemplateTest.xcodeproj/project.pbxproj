@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0553E57F2E59BFE0005B305B /* ReduxCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0553E57E2E59BFE0005B305B /* ReduxCore */; };
+		05DAF74A2E5AFF5A00E2568B /* Dependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 05DAF7492E5AFF5A00E2568B /* Dependencies */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0553E57F2E59BFE0005B305B /* ReduxCore in Frameworks */,
+				05DAF74A2E5AFF5A00E2568B /* Dependencies in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +80,7 @@
 			name = TemplateTest;
 			packageProductDependencies = (
 				0553E57E2E59BFE0005B305B /* ReduxCore */,
+				05DAF7492E5AFF5A00E2568B /* Dependencies */,
 			);
 			productName = TemplateTest;
 			productReference = 0553E56F2E59BFCB005B305B /* TemplateTest.app */;
@@ -109,6 +112,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				0553E57D2E59BFE0005B305B /* XCRemoteSwiftPackageReference "ReduxCore" */,
+				05DAF7482E5AFF5A00E2568B /* XCRemoteSwiftPackageReference "swift-dependencies" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0553E5702E59BFCB005B305B /* Products */;
@@ -352,6 +356,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		05DAF7482E5AFF5A00E2568B /* XCRemoteSwiftPackageReference "swift-dependencies" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-dependencies";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.9.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -359,6 +371,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0553E57D2E59BFE0005B305B /* XCRemoteSwiftPackageReference "ReduxCore" */;
 			productName = ReduxCore;
+		};
+		05DAF7492E5AFF5A00E2568B /* Dependencies */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 05DAF7482E5AFF5A00E2568B /* XCRemoteSwiftPackageReference "swift-dependencies" */;
+			productName = Dependencies;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
