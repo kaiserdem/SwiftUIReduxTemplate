@@ -1,29 +1,32 @@
 # SwiftUI Redux Template
 
-Готова Redux архітектура для SwiftUI проектів
+Готова модульна Redux архітектура для SwiftUI проектів 
 
 ## 📁 Структура
 
 ```
     SwiftUIRedux/
 ├── Store/
-│ ├── StoreProvider.swift # ✅ ГОТОВИЙ: ObservableStore для SwiftUI
-│ └── StateReducer.swift # ✅ НОВИЙ: Протокол StateReducer
+│ ├── StoreProvider.swift
+│ └── StateReducer.swift
 ├── Commands/
-│ └── CommandWith.swift # ✅ ГОТОВИЙ: Command pattern
+│ └── CommandWith.swift
 ├── Lifecycle/
-│ └── ApplicationState.swift # ✅ ГОТОВИЙ: Життєвий цикл додатку
+│ └── ApplicationState.swift
 └── Debugging/
-    └── DebugLogMiddleware.swift # ✅ ГОТОВИЙ: Debug middleware
+    └── DebugLogMiddleware.swift 
 
 TemplateTest/ # 🚀 ГОТОВИЙ ПРИКЛАД ВИКОРИСТАННЯ
-├── Core/
+├── Features/ # ✅ Функціональність додатку
 │ ├── Actions/
 │ │ └── Actions.swift # Приклад Actions з новою архітектурою
 │ ├── State/
 │ │ └── AppState.swift # Приклад AppState з протоколом StateReducer
 │ └── Middleware/
 │     └── APIMiddleware.swift # Приклад middleware
+├── App/
+│ ├── TemplateTestApp.swift # Головний App файл
+│ └── AppStateStoreKey.swift # Environment Key для AppState
 └── Views/
     └── CounterView.swift # Приклад View з Redux
 ```
@@ -88,14 +91,13 @@ public extension StateReducer where Self == State {
 ### Крок 3: Створення вашої бізнес-логіки
 Тепер створіть файли для ВАШОГО проекту, використовуючи готовий приклад:
 
-1. **Створіть `Actions.swift`** - скопіюйте код з `TemplateTest/Core/Actions/Actions.swift`
-2. **Створіть `AppState.swift`** - скопіюйте код з `TemplateTest/Core/State/AppState.swift`  
-3. **Створіть ваші Middleware** - скопіюйте код з `TemplateTest/Core/Middleware/APIMiddleware.swift`
-4. **Оновіть `App.swift`** - використайте код з `TemplateTest/App/TemplateTestApp.swift`
+1. **Створіть `Actions.swift`** - скопіюйте код з `TemplateTest/Features/Actions/Actions.swift`
+2. **Створіть `AppState.swift`** - скопіюйте код з `TemplateTest/Features/State/AppState.swift`  
+3. **Створіть ваші Middleware** - скопіюйте код з `TemplateTest/Features/Middleware/APIMiddleware.swift`
+4. **Створіть `AppStateStoreKey.swift`** - скопіюйте код з `TemplateTest/App/AppStateStoreKey.swift`
+5. **Оновіть `App.swift`** - використайте код з `TemplateTest/App/TemplateTestApp.swift`
 
-💡 **Чому копіювати з TemplateTest?** Це готовий робочий приклад нової архітектури!
-
-## 💻 Приклад використання  архітектури
+## 💻 Приклад використання архітектури
 
 ### Actions.swift
 ```swift
@@ -105,8 +107,8 @@ import ReduxCore
 enum Actions {
     struct StartLoading: Action {}
     struct LoadingFinished: Action { let items: [String] }
-    struct AddItem: Action {} 
-    struct ClearItems: Action {}
+    struct AddSingleItem: Action {}    
+    struct ClearItems: Action {}    
 }
 ```
 
@@ -139,7 +141,7 @@ struct AppState: StateReducer {
             state.isLoading = false
             state.items = state.items + action.items
             
-        case is Actions.AddItem: 
+        case _ as Actions.AddSingleItem:
             let newItem = "Item \(state.items.count + 1)"
             state.items = state.items + [newItem]
             
@@ -149,6 +151,24 @@ struct AppState: StateReducer {
         default:
             break
         }
+    }
+}
+```
+
+### AppStateStoreKey.swift
+```swift
+import Foundation
+import ReduxCore
+import SwiftUI
+
+struct AppStateStoreKey: EnvironmentKey {
+    static var defaultValue: ObservableStore<AppState>? = nil
+}
+
+extension EnvironmentValues {
+    var appStateStore: ObservableStore<AppState>? {
+        get { self[AppStateStoreKey.self] }
+        set { self[AppStateStoreKey.self] = newValue }
     }
 }
 ```
@@ -173,7 +193,7 @@ struct YourApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.appStore, store)
+                .environment(\.appStateStore, store)
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
@@ -196,7 +216,7 @@ struct YourApp: App {
 ### ContentView.swift
 ```swift
 struct ContentView: View {
-    @Environment(\.appStore) private var store: ObservableStore<AppState>?
+    @Environment(\.appStateStore) private var store: ObservableStore<AppState>?
     
     var body: some View {
         VStack(spacing: 20) {
@@ -209,7 +229,7 @@ struct ContentView: View {
                 }
                 
                 Button("Add Item") {
-                    store.dispatch(action: Actions.AddItem()) 
+                    store.dispatch(action: Actions.AddSingleItem()) 
                 }
                 
                 Button("Clear Items") {
@@ -250,4 +270,3 @@ struct ContentView: View {
 1. ✅ **Готові компоненти**: Додайте папку `SwiftUIRedux/` → імпортуйте та використовуйте
 2. 🚀 **Ваша логіка**: Скопіюйте код з `TemplateTest/` → налаштуйте під ваш проект  
 3. 🔗 **Залежності**: Додайте `ReduxCore` через SPM
-4. 🚀 **Насолоджуйтесь новою Redux архітектурою!**
