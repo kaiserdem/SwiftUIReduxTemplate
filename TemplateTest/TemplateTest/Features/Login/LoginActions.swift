@@ -10,8 +10,9 @@ import ReduxCore
 
 enum LoginActions {
     struct EmailChaged: Action { let email: String }
-    struct SetLogin: Action { }
+    struct SetLogin: Action { let loginData: String }
     struct CompletionLogin: Action { let result: Result<String,Error> }
+    struct ShowLoginError: Action { let showError: Bool }
     struct CheckValidation: Action { let isValidEmail: Bool }
 
 }

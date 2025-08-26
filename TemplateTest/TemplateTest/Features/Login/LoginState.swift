@@ -16,6 +16,8 @@ struct LoginState: StateReducer {
     var isLoggedIn: Bool = false
     var isLoading: Bool = false
     var isValidEmail: Bool = false
+    var showLofinError: Bool = false
+    var errorMessage: String? = nil
     
     static let inital = State(appliocation: ApplicationState.inactive)
     
@@ -34,10 +36,14 @@ struct LoginState: StateReducer {
             case .success(let token):
                 print("Success, need save token: \(token)")
                 state.isLoggedIn  = true
+                state.errorMessage = nil
                 
             case .failure(let error):
                 print("Error, \(error.localizedDescription)")
+                state.email = ""
                 state.isLoggedIn = false
+                state.showLofinError = true
+                state.errorMessage = error.localizedDescription
             }
             
             

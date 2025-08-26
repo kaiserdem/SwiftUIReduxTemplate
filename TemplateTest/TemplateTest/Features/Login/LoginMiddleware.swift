@@ -7,8 +7,11 @@
 
 import Foundation
 import ReduxCore
+import Dependencies
 
 struct LoginMiddleware {
+    
+    @Dependency(\.loginApiManager) var loginApiManager
     
     func middleware() -> Middleware<LoginState> {
         
@@ -18,11 +21,18 @@ struct LoginMiddleware {
             case let action as LoginActions.EmailChaged:
                 dispatch(LoginActions.CheckValidation(isValidEmail: !action.email.isEmpty))
                 
-            case is LoginActions.SetLogin:
+            case let action as LoginActions.SetLogin:
                                 
                 Task {
-                    try await Task.sleep(for: .seconds(2))                    
-                    dispatch(LoginActions.CompletionLogin(result: .success("Token")))
+                    
+                    do  {
+                        let token = try await loginApiManager.login(action.loginData)
+                        dispatch(LoginActions.CompletionLogin(result: .success(token ?? "")))
+
+                    } catch {
+                        dispatch(LoginActions.CompletionLogin(result: .failure(error)))
+                        dispatch(LoginActions.ShowLoginError(showError: true))
+                    }
                 }
                 
             default:

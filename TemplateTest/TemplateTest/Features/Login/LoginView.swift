@@ -43,7 +43,7 @@ struct LoginView: View {
                     
                     
                     Button("Login") {
-                        store.dispatch(action: LoginActions.SetLogin())
+                        store.dispatch(action: LoginActions.SetLogin(loginData: store.state.email))
                     }
                     .padding()
                     .frame(maxWidth: .infinity)
@@ -51,6 +51,14 @@ struct LoginView: View {
                     .border(store.state.isValidEmail ? .green : .red)
                 }
                 .padding()
+            }
+            .alert(isPresented: Binding(get: { store.state.showLofinError },
+                                        set: { store.dispatch(action: LoginActions.ShowLoginError(showError: $0)) })) {
+                Alert(title: Text("Error"),
+                      message: Text("\(store.state.errorMessage ?? "")"),
+                      dismissButton: .cancel(Text("Ok"), action: {
+                    store.dispatch(action: LoginActions.ShowLoginError(showError: false))
+                }))
             }
         }
     }
