@@ -11,23 +11,42 @@ import ReduxCore
 @main
 struct TemplateTestApp: App {
     
-    private let store = ObservableStore<TabState>(
-        store: Store<TabState>(
-            state: TabState.inital,
-            reducer: TabState.reduce,
+//    private let store = ObservableStore<TabState>(
+//        store: Store<TabState>(
+//            state: TabState.inital,
+//            reducer: TabState.reduce,
+//            middlewares: [
+//                DebugLogMiddleware<TabState>().middleware(),
+//                APICounterMiddleware().middleware(),
+//                ImageMiddleware().middleware()
+//            ]
+//        )
+//    )
+//    var body: some Scene {
+//        WindowGroup {
+//            TabView()
+//                .environment(\.tabStateStore, store)
+//        }
+    
+    
+    
+    
+    
+    
+    private let store = ObservableStore<LoginState>(
+        store: Store<LoginState>(
+            state: LoginState.inital,
+            reducer: LoginState.reduce,
             middlewares: [
-                DebugLogMiddleware<TabState>().middleware(),
-                APICounterMiddleware().middleware(),
-                ImageMiddleware().middleware()
+                LoginMiddleware().middleware()
             ]
         )
     )
     var body: some Scene {
         WindowGroup {
-            TabView()
-                .environment(\.tabStateStore, store)
+            LoginView()
+                .environment(\.loginStateStore, store)
         }
-    
     
 //    private let store = ObservableStore<ImageState>(
 //        store: Store<ImageState>(
