@@ -13,7 +13,7 @@ struct LoginMiddleware {
     
     @Dependency(\.loginApiManager) var loginApiManager
     
-    func middleware() -> Middleware<LoginState> {
+    func middleware() -> Middleware<AppRouterState> {
         
         { dispatch, action, oldValue, newValue in
             switch action {

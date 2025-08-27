@@ -11,6 +11,23 @@ import ReduxCore
 @main
 struct TemplateTestApp: App {
     
+    
+    private let store = ObservableStore<AppRouterState>(
+        store: Store<AppRouterState>(
+            state: AppRouterState.inital,
+            reducer: AppRouterState.reduce,
+            middlewares: [
+                DebugLogMiddleware<AppRouterState>().middleware(),
+                LoginMiddleware().middleware()
+            ]
+        )
+    )
+    var body: some Scene {
+        WindowGroup {
+            AppRouterView()
+                .environment(\.appRouterStateStore, store)
+        }
+    
 //    private let store = ObservableStore<TabState>(
 //        store: Store<TabState>(
 //            state: TabState.inital,
@@ -33,20 +50,20 @@ struct TemplateTestApp: App {
     
     
     
-    private let store = ObservableStore<LoginState>(
-        store: Store<LoginState>(
-            state: LoginState.inital,
-            reducer: LoginState.reduce,
-            middlewares: [
-                LoginMiddleware().middleware()
-            ]
-        )
-    )
-    var body: some Scene {
-        WindowGroup {
-            LoginView()
-                .environment(\.loginStateStore, store)
-        }
+//    private let store = ObservableStore<LoginState>(
+//        store: Store<LoginState>(
+//            state: LoginState.inital,
+//            reducer: LoginState.reduce,
+//            middlewares: [
+//                LoginMiddleware().middleware()
+//            ]
+//        )
+//    )
+//    var body: some Scene {
+//        WindowGroup {
+//            LoginView()
+//                .environment(\.loginStateStore, store)
+//        }
     
 //    private let store = ObservableStore<ImageState>(
 //        store: Store<ImageState>(
