@@ -9,23 +9,23 @@ import Foundation
 import Dependencies
 
 protocol LoginApi {
-    func login(_ email: String) async throws -> String?
+    func login(_ email: String) async throws -> String
 }
 
 struct LoginApiManager: LoginApi {
     
-    let errorProbiably: Double = 0.25
+    let errorProbability: Double = 0.25
     
-    func login(_ email: String) async throws -> String? {
+    func login(_ email: String) async throws -> String {
         
         // https request simulation
-            try await Task.sleep(for: .seconds(2))
-            
-            if errorProbiably > Double.random(in: 0...1) {
-                throw NSError(domain: "", code: 1, userInfo: [NSLocalizedDescriptionKey : "Invalid email address"])
-            }
-            
-            return "Some token 1234567890"
+        try await Task.sleep(for: .seconds(2))
+        
+        if Double.random(in: 0...1) < errorProbability {
+            throw NSError(domain: "LoginError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid email address"])
+        }
+        
+        return "Some token 1234567890"
     }
 }
 

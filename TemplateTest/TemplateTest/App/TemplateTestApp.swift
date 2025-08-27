@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ReduxCore
+import Dependencies
 
 @main
 struct TemplateTestApp: App {

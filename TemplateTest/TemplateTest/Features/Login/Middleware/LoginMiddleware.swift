@@ -7,13 +7,15 @@
 
 import Foundation
 import ReduxCore
+import Dependencies
 
 struct LoginMiddleware {
+    
+    @Dependency(\.loginApiManager) var loginApiManager
     
     func middleware() -> Middleware<AppRouterState> {
         
         { dispatch, action, oldState, newState in
-            
             switch action {
                 
             case let action as LoginActions.EmailChanged:
@@ -22,9 +24,13 @@ struct LoginMiddleware {
                 
             case is LoginActions.SetLogin:
                 Task {
-                    // Симуляція API виклику
-                    try await Task.sleep(for: .seconds(2))
-                    dispatch(LoginActions.CompletionLogin(result: .success("Token123")))
+                    
+                    do {
+                        let token = try await loginApiManager.login(oldState.loginState.email)
+                        dispatch(LoginActions.CompletionLogin(result: .success(token)))
+                    } catch {
+                        dispatch(LoginActions.CompletionLogin(result: .failure(error)))
+                    }
                 }
                 
             default:
