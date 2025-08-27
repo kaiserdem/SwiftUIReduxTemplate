@@ -10,14 +10,14 @@ import Foundation
 import ReduxCore
 
 struct APICounterMiddleware {
-    func middleware() -> Middleware<TabState> {
+    func middleware() -> Middleware<AppRouterState> {
         { dispatch, action, oldState, newState in
             switch action {
             case is CounterActions.StartLoading:
                 Task {
                     try? await Task.sleep(nanoseconds: 2_000_000_000) 
                     
-                    let number = oldState.counterState.items.count + 1
+                    let number = oldState.tabbarState.counterState.items.count + 1
                     let items = ["Item \(number)"]
                     await MainActor.run {
                         dispatch(CounterActions.LoadingFinished(items: items))

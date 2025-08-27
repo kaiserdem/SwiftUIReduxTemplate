@@ -15,15 +15,15 @@ enum Tab {
 struct TabState: StateReducer {
     typealias State = TabState
     
-    var application: ApplicationState
-    var selectedTab: Tab = .image
-    var counterState: CounterState.State = .initial
-    var imageState: ImageState.State = .inital
+    var selectedTab: Tab = .counter
+    var counterState: CounterState
+    var imageState: ImageState
     
-    static let inital = State(application: ApplicationState.initial,
-                              selectedTab: .image,
-                              counterState: CounterState.initial,
-                              imageState: ImageState.inital)
+    static let initial = State(
+        selectedTab: .counter,
+        counterState: CounterState.initial,
+        imageState: ImageState.initial
+    )
 
     static func stateReduce(into state: inout TabState, action: any Action) {
         
@@ -52,17 +52,7 @@ struct TabState: StateReducer {
         case is ImageActions.ErrorDownloadImage:
             state.imageState = ImageState.reduce(state.imageState, with: action)
             
-        case is ApplicationLifecycleActions.DidBecomeActive:
-            state.application = .active
-            
-        case is ApplicationLifecycleActions.DidEnterBackground:
-            state.application = .background
-            
-        case is ApplicationLifecycleActions.WillResignActive:
-            state.application = .inactive
-            
         default:
-            print("Невідомий action: \(type(of: action))")
             break
         }
     }

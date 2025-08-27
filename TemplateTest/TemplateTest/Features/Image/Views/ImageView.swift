@@ -10,18 +10,30 @@ import ReduxCore
 
 struct ImageView: View {
     
-    @Environment(\.tabStateStore) private var store: ObservableStore<TabState>?
+    @Environment(\.appRouterStateStore) private var store: ObservableStore<AppRouterState>?
 
     var body: some View {
         if let store = store {
             VStack {
+                if store.state.tabbarState.imageState.isLoading {
+                    ProgressView()
+                        .padding()
+                }
+                
                 ScrollView {
-                    ForEach(store.state.imageState.images, id: \.self) { image in
+                    ForEach(store.state.tabbarState.imageState.images, id: \.self) { image in
                         Image(uiImage: image)
                             .resizable()
                             .scaledToFit()
+                            .padding()
                     }
                 }
+                
+                Button("Download New Image") {
+                    store.dispatch(action: ImageActions.DownloadImage())
+                }
+                .buttonStyle(.borderedProminent)
+                .padding()
             }
             .onAppear {
                 store.dispatch(action: ImageActions.DownloadImage())
@@ -29,3 +41,4 @@ struct ImageView: View {
         }
     }
 }
+

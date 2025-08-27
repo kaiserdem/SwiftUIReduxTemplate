@@ -11,16 +11,12 @@ import ReduxCore
 struct CounterState: StateReducer {
     typealias State = CounterState
     
-    let application: ApplicationState
     var isLoading: Bool
     var items: [String]
-    let errorMessage: String?
     
     static let initial = State(
-        application: ApplicationState.initial,
         isLoading: false,
-        items: [],
-        errorMessage: nil
+        items: []
     )
     
     static func stateReduce(into state: inout CounterState, action: any Action) {

@@ -7,26 +7,31 @@
 
 import Foundation
 import ReduxCore
-import Dependencies
+import UIKit
 
 struct ImageMiddleware {
-    @Dependency(\.imageManager) var imageManager
     
-    func middleware() -> Middleware<TabState> {
-        { dispatch, action, oldValue, newValue in
+    func middleware() -> Middleware<AppRouterState> {
+        { dispatch, action, oldState, newState in
             switch action {
-            case  is ImageActions.DownloadImage:
+            case is ImageActions.DownloadImage:
                 Task {
-                    do {
-                        let urlString = "https://images.pexels.com/photos/842711/pexels-photo-842711.jpeg"
-                        let image = try await imageManager.downloadImage(urlString)
-                        
+                    try await Task.sleep(for: .seconds(1))
+                    
+                    let size = CGSize(width: 100, height: 100)
+                    UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+                    UIColor.blue.setFill()
+                    UIRectFill(CGRect(origin: .zero, size: size))
+                    let image = UIGraphicsGetImageFromCurrentImageContext()
+                    UIGraphicsEndImageContext()
+                    
+                    if let image = image {
                         await MainActor.run {
                             dispatch(ImageActions.CompletionImage(image: image))
                         }
-                    } catch {
+                    } else {
                         await MainActor.run {
-                            dispatch(ImageActions.ErrorDownloadImage(error: error))
+                            dispatch(ImageActions.ErrorDownloadImage(error: NSError(domain: "ImageError", code: 1, userInfo: nil)))
                         }
                     }
                 }

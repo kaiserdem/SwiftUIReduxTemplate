@@ -9,57 +9,48 @@ import SwiftUI
 import ReduxCore
 
 struct LoginView: View {
-    @Environment(\.loginStateStore) private var store: ObservableStore<LoginState>?
+    @Environment(\.appRouterStateStore) private var store: ObservableStore<AppRouterState>?
     
     var body: some View {
         if let store = store {
-            
-            ZStack {
+            VStack(spacing: 20) {
+                Text("Login Screen")
+                    .font(.largeTitle)
+                    .bold()
                 
-                VStack {
-                    Text("Login screen")
-                        .font(.largeTitle)
-                        .bold()
-                    
-                    Text(!store.state.isLoggedIn ? "Need enter" : "Enter success")
-                        .font(.title)
+                Spacer()
+                
+                Text("Please enter your email to continue")
+                    .font(.title2)
+                    .foregroundColor(.secondary)
+                
+              
+                TextField("Email", text: Binding(
+                    get: { store.state.loginState.email },
+                    set: { newEmail in
+                        store.dispatch(action: LoginActions.EmailChanged(email: newEmail))
+                    }
+                ))
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.horizontal)
+                
+                if store.state.loginState.isLoading {
+                    ProgressView()
                         .padding()
-                        .foregroundColor(store.state.isLoggedIn ? .green : .blue)
-                    
-                    if store.state.isLoading {
-                        ProgressView()
-                    }
-                    
-                       
-                    Spacer()
                 }
                 
-                VStack {
-                    TextField("Email", text: Binding(
-                        get: {store.state.email},
-                        set: {store.dispatch(action: LoginActions.EmailChaged(email: $0))}))
-                    .padding()
-                    .border(store.state.isValidEmail ? .blue : .gray)
-                    
-                    
-                    Button("Login") {
-                        store.dispatch(action: LoginActions.SetLogin(loginData: store.state.email))
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .disabled(!store.state.isValidEmail)
-                    .border(store.state.isValidEmail ? .green : .red)
+                Button("Login") {
+                    store.dispatch(action: LoginActions.SetLogin())
                 }
-                .padding()
+                .buttonStyle(.borderedProminent)
+                .disabled(!store.state.loginState.isValidEmail || store.state.loginState.email.isEmpty)
+                .padding(.horizontal)
+                
+                Spacer()
             }
-            .alert(isPresented: Binding(get: { store.state.showLofinError },
-                                        set: { store.dispatch(action: LoginActions.ShowLoginError(showError: $0)) })) {
-                Alert(title: Text("Error"),
-                      message: Text("\(store.state.errorMessage ?? "")"),
-                      dismissButton: .cancel(Text("Ok"), action: {
-                    store.dispatch(action: LoginActions.ShowLoginError(showError: false))
-                }))
-            }
+            .padding()
+        } else {
+            Text("❌ Store не знайдено!")
         }
     }
 }

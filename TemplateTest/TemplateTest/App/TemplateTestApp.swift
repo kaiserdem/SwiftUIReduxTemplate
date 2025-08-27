@@ -11,96 +11,26 @@ import ReduxCore
 @main
 struct TemplateTestApp: App {
     
+    @Environment(\.scenePhase) private var scenePhase
     
     private let store = ObservableStore<AppRouterState>(
         store: Store<AppRouterState>(
-            state: AppRouterState.inital,
+            state: AppRouterState.initial,
             reducer: AppRouterState.reduce,
             middlewares: [
                 DebugLogMiddleware<AppRouterState>().middleware(),
-                LoginMiddleware().middleware()
+                LoginMiddleware().middleware(),
+                APICounterMiddleware().middleware(),
+                ImageMiddleware().middleware()
             ]
         )
     )
+    
     var body: some Scene {
         WindowGroup {
             AppRouterView()
                 .environment(\.appRouterStateStore, store)
         }
-    
-//    private let store = ObservableStore<TabState>(
-//        store: Store<TabState>(
-//            state: TabState.inital,
-//            reducer: TabState.reduce,
-//            middlewares: [
-//                DebugLogMiddleware<TabState>().middleware(),
-//                APICounterMiddleware().middleware(),
-//                ImageMiddleware().middleware()
-//            ]
-//        )
-//    )
-//    var body: some Scene {
-//        WindowGroup {
-//            TabView()
-//                .environment(\.tabStateStore, store)
-//        }
-    
-    
-    
-    
-    
-    
-//    private let store = ObservableStore<LoginState>(
-//        store: Store<LoginState>(
-//            state: LoginState.inital,
-//            reducer: LoginState.reduce,
-//            middlewares: [
-//                LoginMiddleware().middleware()
-//            ]
-//        )
-//    )
-//    var body: some Scene {
-//        WindowGroup {
-//            LoginView()
-//                .environment(\.loginStateStore, store)
-//        }
-    
-//    private let store = ObservableStore<ImageState>(
-//        store: Store<ImageState>(
-//            state: ImageState.inital,
-//            reducer: ImageState.reduce,
-//            middlewares: [
-//                DebugLogMiddleware<ImageState>().middleware(),
-//                ImageMiddleware().middleware()
-//            ]
-//        )
-//    )
-//    var body: some Scene {
-//        WindowGroup {
-//            ImageView()
-//                .environment(\.imageStateStore, store)
-//        }
-    
-    
-    
-    
-    
-//    private let store = ObservableStore<CounterState>(
-//        store: Store<CounterState>(
-//            state: CounterState.initial,
-//            reducer: CounterState.reduce,
-//            middlewares: [
-//                DebugLogMiddleware<CounterState>().middleware(),
-//                               APICounterMiddleware().middleware()
-//            ]
-//        )
-//    )
-//    
-//    var body: some Scene {
-//        WindowGroup {
-//            CounterView()
-//            .environment(\.counterStateStore, store)
-//        }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
@@ -114,6 +44,4 @@ struct TemplateTestApp: App {
             }
         }
     }
-    
-    @Environment(\.scenePhase) private var scenePhase
 }

@@ -11,19 +11,15 @@ import ReduxCore
 struct LoginState: StateReducer {
     typealias State = LoginState
     
-    let appliocation: ApplicationState
     var email: String = ""
-    var isLoggedIn: Bool = false
     var isLoading: Bool = false
     var isValidEmail: Bool = false
-    var showLofinError: Bool = false
-    var errorMessage: String? = nil
     
-    static let inital = State(appliocation: ApplicationState.inactive)
+    static let initial = LoginState()
     
     static func stateReduce(into state: inout LoginState, action: any Action) {
         switch action {
-        case let action as LoginActions.EmailChaged:
+        case let action as LoginActions.EmailChanged:
             state.email = action.email
             
         case is LoginActions.SetLogin:
@@ -32,27 +28,11 @@ struct LoginState: StateReducer {
         case let action as LoginActions.CompletionLogin:
             state.isLoading = false
             
-            switch action.result {
-            case .success(let token):
-                print("Success, need save token: \(token)")
-                state.isLoggedIn  = true
-                state.errorMessage = nil
-                
-            case .failure(let error):
-                print("Error, \(error.localizedDescription)")
-                state.email = ""
-                state.isLoggedIn = false
-                state.showLofinError = true
-                state.errorMessage = error.localizedDescription
-            }
+        case let action as LoginActions.ValidationResult:
+            state.isValidEmail = action.isValidEmail
             
-            
-        case let action as LoginActions.CheckValidation:
-            state.isValidEmail = action.isValidEmail            
         default:
             break
         }
     }
-    
-    
 }

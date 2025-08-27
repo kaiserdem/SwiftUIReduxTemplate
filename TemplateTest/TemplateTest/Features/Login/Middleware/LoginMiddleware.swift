@@ -7,37 +7,35 @@
 
 import Foundation
 import ReduxCore
-import Dependencies
 
 struct LoginMiddleware {
     
-    @Dependency(\.loginApiManager) var loginApiManager
-    
     func middleware() -> Middleware<AppRouterState> {
         
-        { dispatch, action, oldValue, newValue in
+        { dispatch, action, oldState, newState in
+            
             switch action {
                 
-            case let action as LoginActions.EmailChaged:
-                dispatch(LoginActions.CheckValidation(isValidEmail: !action.email.isEmpty))
+            case let action as LoginActions.EmailChanged:
+                let isValidEmail = validateEmail(action.email)
+                dispatch(LoginActions.ValidationResult(isValidEmail: isValidEmail))
                 
-            case let action as LoginActions.SetLogin:
-                                
+            case is LoginActions.SetLogin:
                 Task {
-                    
-                    do  {
-                        let token = try await loginApiManager.login(action.loginData)
-                        dispatch(LoginActions.CompletionLogin(result: .success(token ?? "")))
-
-                    } catch {
-                        dispatch(LoginActions.CompletionLogin(result: .failure(error)))
-                        dispatch(LoginActions.ShowLoginError(showError: true))
-                    }
+                    // Симуляція API виклику
+                    try await Task.sleep(for: .seconds(2))
+                    dispatch(LoginActions.CompletionLogin(result: .success("Token123")))
                 }
                 
             default:
                 break
             }
         }
+    }
+    
+    private func validateEmail(_ email: String) -> Bool {
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
+        return emailPredicate.evaluate(with: email)
     }
 }
